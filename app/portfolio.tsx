@@ -37,18 +37,18 @@ const tiers = {
   complex: {
     label: "Compleja",
     caption: "Acabado premium",
-    vertical: 40,
+    vertical: 60,
     horizontal: 125,
     items: ["Motion graphics", "Rotoscopia y color", "Recursos 3D"],
   },
 } as const;
 
 const collaborators = [
-  { name: "Rabanito", type: "Short-form", avatar: "/media/rabanito-avatar.jpg", note: "Ritmo alto, remates visuales y una edición pensada para detener el scroll." },
-  { name: "Sara Guzo", type: "Video largo", avatar: "/media/sara-guzo-avatar.jpg", note: "Narrativa sostenida, recursos gráficos y cortes que mantienen la atención." },
-  { name: "Maog", type: "Gaming", avatar: "/media/maog-avatar.jpg", note: "Timing de comedia, energía y énfasis visual al servicio de la historia." },
-  { name: "Megazote", type: "Short-form", avatar: "/media/megazote-avatar.jpg", note: "Un formato compacto con impacto rápido, claridad y personalidad." },
-  { name: "Poke Elle", type: "Entretenimiento", avatar: "/media/poke-elle-avatar.jpg", note: "Edición dinámica que convierte cada momento fuerte en una razón para seguir." },
+  { name: "Rabanito", type: "Short-form", avatar: "/media/rabanito-avatar.jpg", note: "Caos controlado: si el remate llega tarde, ya no da risa. Acá cada corte cae donde tiene que caer.", language: "ES" },
+  { name: "Sara Guzo", type: "Long-form", avatar: "/media/sara-guzo-avatar.jpg", note: "Long-form editing that lets the story breathe—then knows exactly when to speed things up.", language: "EN" },
+  { name: "Maog", type: "Gaming", avatar: "/media/maog-avatar.jpg", note: "El timing de comedia manda. Los efectos entran, hacen su trabajo y se van antes de estorbar.", language: "ES" },
+  { name: "Megazote", type: "Short-form", avatar: "/media/megazote-avatar.jpg", note: "Directo al punto, pero nunca plano. Cada segundo tiene algo que empuja al siguiente.", language: "ES" },
+  { name: "Poke Elle", type: "Entertainment", avatar: "/media/poke-elle-avatar.jpg", note: "Bright, quick, and playful. The edit keeps the energy up without getting in the way of her personality.", language: "EN" },
 ];
 
 function ParticleField({ pointer }: { pointer: React.MutableRefObject<{ x: number; y: number }> }) {
@@ -221,7 +221,7 @@ export default function Portfolio() {
             <span className="title-line accent"><i>cuenta.</i></span>
           </h1>
           <p className="hero-intro">
-            Soy Strike. Transformo material bruto en videos claros, ágiles y difíciles de abandonar para creadores de YouTube y redes.
+            Soy Strike, puedo retener tanto tu atención que no te diste cuenta que estás leyendo esto ahora mismo... ¿en serio alguien lee esto??
           </p>
           <div className="hero-actions">
             <a className="button magnetic" href="#trabajos">Ver selección <ArrowDown size={16} /></a>
@@ -237,9 +237,9 @@ export default function Portfolio() {
             <i className="scrub-line" aria-hidden="true" />
           </div>
           <div className="identity-card">
-            <img src="/media/strike-avatar.png" alt="Avatar de Strike" />
-            <div><small>Editor / Motion</small><strong>STRIKE</strong></div>
-            <span>PE · REMOTO</span>
+            <span className="identity-avatar"><img src="/media/strike-avatar.png" alt="Avatar de Strike" /></span>
+            <div><small>Editor / Motion</small><strong>STRIKE</strong><em>sí, el del sombrero</em></div>
+            <i aria-hidden="true" />
           </div>
           <div className="orbit-object" aria-hidden="true">
             <span className="orbit-ring ring-a" /><span className="orbit-ring ring-b" />
@@ -305,21 +305,29 @@ export default function Portfolio() {
 
       <section className="section" id="proceso">
         <div className="section-head reveal">
-          <div><p className="kicker">02 / Cómo trabajo</p><h2>Simple y<br />visible.</h2></div>
+          <div><p className="kicker">02 / Cómo trabajo</p><h2>Ordenado.<br /><em>Más o menos.</em></h2></div>
           <p className="section-lead">
-            Menos fricción, más claridad. Siempre sabes qué estoy haciendo, qué necesito de ti y cuándo recibirás el corte.
+            Mi timeline puede parecer una ciudad vista desde arriba. Tu proceso, no: siempre sabes qué necesito y cuándo llega el corte.
           </p>
+        </div>
+        <div className="process-ribbon reveal" aria-hidden="true">
+          <span>BRIEF</span><i /><span>STORY</span><i /><span>RHYTHM</span><i /><span>DELIVERY</span>
         </div>
         <div className="process reveal">
           {[
-            ["01", "Brief", "Objetivo, audiencia, referencias y tono en una conversación breve."],
-            ["02", "Estructura", "Selecciono los momentos fuertes y ordeno la historia."],
-            ["03", "Edición", "Cortes, sonido, subtítulos y motion donde sí aportan."],
-            ["04", "Entrega", "Una ronda de ajustes y exportación lista para publicar."],
-          ].map(([index, title, note]) => (
-            <article className="step" key={index}><span>{index}</span><h3>{title}</h3><p>{note}</p><i aria-hidden="true" /></article>
+            ["01", "Brief", "Me cuentas qué quieres provocar. Yo hago las preguntas incómodamente útiles.", "HABLAMOS", <MessageCircle key="brief-icon" />],
+            ["02", "Estructura", "Encuentro los momentos que sí importan. El resto no sobrevive al corte.", "ORDENAMOS", <Layers3 key="structure-icon" />],
+            ["03", "Edición", "Ritmo, sonido y motion. Nada entra solo porque el plugin se veía bonito.", "HACEMOS MAGIA", <Sparkles key="edit-icon" />],
+            ["04", "Entrega", "Ajustamos, exportamos y publicas. Fácil. Sospechosamente fácil.", "LISTO", <Check key="delivery-icon" />],
+          ].map(([index, title, note, tag, icon]) => (
+            <article className="step" key={String(index)}>
+              <div className="step-top"><span>{index}</span><b>{tag}</b></div>
+              <div className="step-icon">{icon}</div>
+              <h3>{title}</h3><p>{note}</p><i aria-hidden="true" />
+            </article>
           ))}
         </div>
+        <p className="process-aside reveal">* “¿Puedes hacerlo más dinámico?” Sí. Pero primero dime qué quieres que sienta la gente.</p>
       </section>
 
       <section className="section" id="precios">
@@ -388,7 +396,7 @@ export default function Portfolio() {
           </div>
         </div>
         <p className="source-note reveal">
-          Referencia: encuesta BuscoEditor 2025 · 140 editores · tarifas ajustadas +US$5 sobre el mínimo. El estado del material y requerimientos fuera de alcance pueden modificar la cotización final.
+          Referencia: encuesta BuscoEditor 2025 · 140 editores · tarifas base ajustadas. La edición compleja vertical se establece en US$60. El estado del material y requerimientos fuera de alcance pueden modificar la cotización final (tu presupuesto tampoco debería tener jumpscares).
         </p>
       </section>
 
@@ -398,13 +406,18 @@ export default function Portfolio() {
             <p className="kicker light">04 / También construyo productos</p>
             <h2>Xomacito 3.0</h2>
             <p>
-              Mi aplicación para Windows descarga, convierte y prepara contenido multimedia. Integra FFmpeg, procesamiento inteligente y una colección de 144 gatos: utilidad seria con personalidad propia.
+              Un descargador de video para Windows que pega, analiza y descarga desde YouTube, Vimeo, TikTok e Instagram. También convierte con FFmpeg, organiza colas y, por motivos completamente profesionales, incluye 144 gatos.
             </p>
+            <div className="xoma-tags"><span>DESCARGA</span><span>CONVIERTE</span><span>NO MUERDE</span></div>
             <a className="button light-button" href="https://github.com/Strike2911/Xomacito" target="_blank" rel="noreferrer"><Code2 size={17} /> Ver proyecto en GitHub <ArrowUpRight size={15} /></a>
           </div>
-          <div className="xoma-visual" aria-hidden="true">
-            <div className="wire-cube"><i /><i /><i /><i /><i /><i /></div>
-            <strong>XO</strong><span>WINDOWS / OPEN SOURCE / V3.0</span>
+          <div className="xoma-window">
+            <div className="xoma-titlebar"><span><i /> XOMACITO / MOTOR 3.0</span><b>— □ ×</b></div>
+            <div className="xoma-screen">
+              <img src="/media/xomacito-interface.png" alt="Interfaz de Xomacito 3.0, descargador de video para Windows" />
+              <i className="xoma-scan" aria-hidden="true" />
+            </div>
+            <div className="xoma-status"><span>● SISTEMA LISTO</span><b>YT · TT · IG · VIMEO</b></div>
           </div>
         </div>
       </section>
@@ -413,15 +426,15 @@ export default function Portfolio() {
         <div className="section-head reveal">
           <div><p className="kicker">05 / Colaboraciones</p><h2 id="collab-title">Distintos canales.<br />Un criterio.</h2></div>
           <p className="section-lead">
-            Un vistazo al enfoque aplicado en cada colaboración: cada canal conserva su voz, mientras la edición sostiene ritmo, claridad e intención.
+            No son frases corporativas ni “sinergia audiovisual”. Es la manera más honesta de explicar cómo se siente cada edición.
           </p>
         </div>
         <div className="collab-window reveal">
           <div className="collab-track" style={{ transform: `translateX(-${slide * 34}%)` }}>
             {collaborators.map((item, index) => (
               <article className="collab-card" key={item.name}>
-                <div className="collab-top"><span>COLAB / 0{index + 1}</span><Sparkles size={15} /></div>
-                <p>“{item.note}”</p>
+                <div className="collab-top"><span>NOTA DE EDICIÓN / 0{index + 1}</span><b>{item.language}</b></div>
+                <p>{item.note}</p>
                 <div className="collab-person"><img src={item.avatar} alt="" /><div><b>{item.name}</b><small>{item.type}</small></div></div>
               </article>
             ))}
@@ -438,7 +451,7 @@ export default function Portfolio() {
         <div className="contact-grid" aria-hidden="true" />
         <p className="kicker light">Contacto directo · Lima / remoto</p>
         <h2>¿Tienes material? <em>Hagámoslo contar.</em></h2>
-        <p>Envíame la duración, una referencia y tu fecha ideal. Te respondo con alcance, tiempo y precio.</p>
+        <p>Envíame la duración, una referencia y tu fecha ideal. Prometo responder antes de que termines de ver “solo un reel más”.</p>
         <div className="contact-actions">
           <button className="button" onClick={copyDiscord}>
             {copied ? <Check size={18} /> : <MessageCircle size={18} />}
