@@ -1,41 +1,35 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import "./globals.css";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const requestHeaders = await headers();
-  const host =
-    requestHeaders.get("x-forwarded-host") ??
-    requestHeaders.get("host") ??
-    "localhost:3000";
-  const protocol =
-    requestHeaders.get("x-forwarded-proto") ??
-    (host.startsWith("localhost") ? "http" : "https");
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  "https://strike-editor-portfolio.strike2911.chatgpt.site";
+const socialImage = `${siteUrl.replace(/\/$/, "")}/og.png`;
 
-  return {
-    metadataBase: new URL(`${protocol}://${host}`),
-    title: "Strike — Editor de video & motion",
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  title: "Strike — Editor de video & motion",
+  description:
+    "Edición de video con ritmo, narrativa y motion design para creadores que quieren hacer que cada segundo cuente.",
+  icons: {
+    icon: `${basePath}/favicon.png`,
+    shortcut: `${basePath}/favicon.png`,
+  },
+  openGraph: {
+    title: "Strike — Cada segundo cuenta",
     description:
-      "Edición de video con ritmo, narrativa y motion design para creadores que quieren hacer que cada segundo cuente.",
-    icons: {
-      icon: "/favicon.png",
-      shortcut: "/favicon.png",
-    },
-    openGraph: {
-      title: "Strike — Cada segundo cuenta",
-      description:
-        "Shorts, videos largos y motion design para creadores de contenido.",
-      images: ["/og.png"],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: "Strike — Cada segundo cuenta",
-      description:
-        "Shorts, videos largos y motion design para creadores de contenido.",
-      images: ["/og.png"],
-    },
-  };
-}
+      "Shorts, videos largos y motion design para creadores de contenido.",
+    images: [socialImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Strike — Cada segundo cuenta",
+    description:
+      "Shorts, videos largos y motion design para creadores de contenido.",
+    images: [socialImage],
+  },
+};
 
 export default function RootLayout({
   children,

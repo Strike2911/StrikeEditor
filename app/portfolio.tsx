@@ -4,14 +4,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowDown,
   ArrowUpRight,
+  AudioLines,
   Check,
+  Clapperboard,
   Clock3,
   Code2,
-  Copy,
+  Gauge,
   Layers3,
   MessageCircle,
   Play,
   Sparkles,
+  WandSparkles,
   Zap,
 } from "lucide-react";
 import { FaDiscord, FaYoutube } from "react-icons/fa6";
@@ -19,6 +22,8 @@ import { FaDiscord, FaYoutube } from "react-icons/fa6";
 type Format = "vertical" | "horizontal";
 type Tier = "basic" | "intermediate" | "complex";
 type Language = "es" | "en";
+
+const media = (path: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path}`;
 
 const tiers = {
   basic: {
@@ -45,32 +50,32 @@ const collaborators = [
   {
     name: "Rabanito",
     avatar: "/media/rabanito-avatar.jpg",
-    es: { type: "Formato corto", note: "Caos controlado: si el remate llega tarde, ya no da risa. Acá cada corte cae donde tiene que caer." },
-    en: { type: "Short-form", note: "Controlled chaos: if the punchline lands late, it stops being funny. Every cut lands exactly where it should." },
+    es: { type: "Formato corto", note: "Strike entiende dónde meter el corte para que el chiste pegue. Seguimos trabajando porque ya conoce el tono del canal." },
+    en: { type: "Short-form", note: "Strike knows where to place the cut so the joke lands. We keep working together because he already understands the channel." },
   },
   {
     name: "Sara Guzo",
     avatar: "/media/sara-guzo-avatar.jpg",
-    es: { type: "Formato largo", note: "Una edición de formato largo que deja respirar la historia y sabe exactamente cuándo acelerar." },
-    en: { type: "Long-form", note: "Long-form editing that lets the story breathe—then knows exactly when to speed things up." },
+    es: { type: "Formato largo", note: "Strike toma en serio cada comentario y mantiene el ritmo limpio. Puedo enviarle el material y confiar en el corte final." },
+    en: { type: "Long-form", note: "Strike takes feedback seriously and keeps the pacing clean. I can send him the footage and trust the final cut." },
   },
   {
     name: "Maog",
     avatar: "/media/maog-avatar.jpg",
-    es: { type: "Gaming", note: "El timing de comedia manda. Los efectos entran, hacen su trabajo y se van antes de estorbar." },
-    en: { type: "Gaming", note: "Comedy timing comes first. Effects enter, do their job, and leave before getting in the way." },
+    es: { type: "Gaming", note: "Le paso la idea, le explico el chiste y él encuentra cómo hacerlo funcionar sin llenar todo de efectos." },
+    en: { type: "Gaming", note: "I send him the idea, explain the joke, and he finds a way to make it work without covering everything in effects." },
   },
   {
     name: "Megazote",
     avatar: "/media/megazote-avatar.jpg",
-    es: { type: "Formato corto", note: "Directo al punto, pero nunca plano. Cada segundo tiene algo que empuja al siguiente." },
-    en: { type: "Short-form", note: "Straight to the point, but never flat. Every second gives you a reason to watch the next one." },
+    es: { type: "Formato corto", note: "Con Strike no tengo que explicar veinte veces el ritmo. Entiende el formato y entrega algo que sí se siente parte del canal." },
+    en: { type: "Short-form", note: "With Strike, I don't have to explain the pacing twenty times. He understands the format and delivers something that feels like the channel." },
   },
   {
     name: "Poke Elle",
     avatar: "/media/poke-elle-avatar.jpg",
-    es: { type: "Entretenimiento", note: "Brillante, rápido y juguetón. La edición mantiene la energía sin tapar su personalidad." },
-    en: { type: "Entertainment", note: "Bright, quick, and playful. The edit keeps the energy up without getting in the way of her personality." },
+    es: { type: "Entretenimiento", note: "Strike entiende la energía que busco y hace que la edición sea divertida sin volverla abrumadora." },
+    en: { type: "Entertainment", note: "Strike understands the energy I want and makes the edits feel fun without making them overwhelming." },
   },
 ] as const;
 
@@ -97,6 +102,12 @@ const pageCopy = {
       note: "sí, ese soy yo",
     },
     arsenal: "MI ARSENAL, DIGO... MIS PROGRAMAS",
+    signals: [
+      ["Narrativa", "Cada corte empuja la historia."],
+      ["Ritmo", "Pausa cuando toca. Acelera cuando conviene."],
+      ["Motion", "Solo cuando aporta de verdad."],
+      ["Sonido", "La mitad del impacto entra por los oídos."],
+    ],
     work: {
       kicker: "01 / Trabajo seleccionado",
       title: ["Checa mi", "edición."],
@@ -145,7 +156,7 @@ const pageCopy = {
       adjustment: "Una ronda de ajustes",
       export: "Exportación final",
       consult: "Consultar disponibilidad",
-      source: "Referencia: encuesta BuscoEditor 2025 · 140 editores · tarifas base ajustadas. La edición compleja vertical se establece en US$60. El estado del material y requerimientos fuera de alcance pueden modificar la cotización final (tu presupuesto tampoco debería tener jumpscares).",
+      source: "Referencia: encuesta BuscoEditor 2025 · 140 editores · tarifas base ajustadas. La edición compleja vertical se establece en US$60. El estado del material y los requerimientos fuera de alcance pueden modificar la cotización final.",
       assistant: "ASISTENTE FINANCIERO",
       assistantNote: "No sabe matemáticas, pero juzga tu presupuesto.",
     },
@@ -191,6 +202,12 @@ const pageCopy = {
       note: "yes, that's me",
     },
     arsenal: "MY ARSENAL—I MEAN... MY SOFTWARE",
+    signals: [
+      ["Story", "Every cut moves the story forward."],
+      ["Pacing", "Pause when needed. Move fast when it helps."],
+      ["Motion", "Only when it adds something real."],
+      ["Sound", "Half the impact enters through your ears."],
+    ],
     work: {
       kicker: "01 / Selected work",
       title: ["Check out my", "editing."],
@@ -239,7 +256,7 @@ const pageCopy = {
       adjustment: "One revision round",
       export: "Final export",
       consult: "Check availability",
-      source: "Reference: BuscoEditor 2025 survey · 140 editors · adjusted base rates. Complex vertical editing starts at US$60. Material condition and out-of-scope requirements may change the final quote (your budget should not have jumpscares either).",
+      source: "Reference: BuscoEditor 2025 survey · 140 editors · adjusted base rates. Complex vertical editing starts at US$60. Material condition and out-of-scope requirements may change the final quote.",
       assistant: "FINANCIAL ASSISTANT",
       assistantNote: "Bad at math, excellent at judging your budget.",
     },
@@ -415,7 +432,6 @@ export default function Portfolio() {
   const [amount, setAmount] = useState(1);
   const [urgent, setUrgent] = useState(false);
   const [slide, setSlide] = useState(0);
-  const [copied, setCopied] = useState(false);
   const c = pageCopy[language];
 
   const price = useMemo(() => {
@@ -461,12 +477,6 @@ export default function Portfolio() {
     setAmount(next === "vertical" ? 1 : 10);
   };
 
-  const copyDiscord = async () => {
-    await navigator.clipboard.writeText("just_stream");
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
-  };
-
   const updatePointer = (event: React.PointerEvent<HTMLElement>) => {
     const target = shell.current;
     pointer.current = { x: event.clientX, y: event.clientY };
@@ -486,10 +496,13 @@ export default function Portfolio() {
       <ParticleField pointer={pointer} />
       <div className="screen-vignette" aria-hidden="true" />
       <nav className="nav" aria-label={c.nav.label}>
-        <a className="brand" href="#inicio" aria-label="Ryan Gosling, inicio">
-          <span className="brand-mark brand-ryan"><img src="/media/ryan-gosling.webp" alt="" /></span>
-          <span>RYAN GOSLING</span>
-          <small>EDITOR</small>
+        <a className="brand brand-easter" href="#inicio" aria-label="Strike Editor, inicio">
+          <span className="brand-mark">
+            <img className="brand-image-default" src={media("/media/strike-avatar-new.webp")} alt="" />
+            <img className="brand-image-egg" src={media("/media/ryan-gosling.webp")} alt="" />
+          </span>
+          <span className="brand-copy"><b>STRIKE EDITOR</b><i>RYAN GOSLING</i></span>
+          <small>PORTFOLIO</small>
         </a>
         <div className="nav-links">
           <a href="#trabajos">{c.nav.work}</a>
@@ -503,7 +516,7 @@ export default function Portfolio() {
             <button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")} aria-pressed={language === "en"}><span aria-hidden="true">🇺🇸</span><b>EN</b></button>
           </div>
           <a href="https://www.youtube.com/@ElStrikew" target="_blank" rel="noreferrer" aria-label="YouTube de Strike"><FaYoutube /></a>
-          <button onClick={copyDiscord} aria-label={c.discordCopy}><FaDiscord /></button>
+          <a href="https://discord.com/app" target="_blank" rel="noreferrer" aria-label="Discord"><FaDiscord /></a>
           <div className="nav-status"><span>{c.nav.available}</span></div>
         </div>
       </nav>
@@ -525,13 +538,13 @@ export default function Portfolio() {
 
         <div className="hero-stage">
           <div className="hero-media">
-            <video src="/media/poke-elle-edit.mp4" autoPlay muted loop playsInline preload="metadata" />
+            <video src={media("/media/poke-elle-edit.mp4")} autoPlay muted loop playsInline preload="metadata" />
             <span className="media-label"><Play size={11} fill="currentColor" /> {c.hero.selected}</span>
             <span className="media-time">Poke Elle</span>
             <i className="scrub-line" aria-hidden="true" />
           </div>
           <div className="identity-card" data-status={c.nav.available.toUpperCase()}>
-            <span className="identity-avatar"><img src="/media/strike-avatar-new.webp" alt="Strike" /></span>
+            <span className="identity-avatar"><img src={media("/media/strike-avatar-new.webp")} alt="Strike" /></span>
             <div><small>{c.hero.role}</small><strong>STRIKE</strong><em>{c.hero.note}</em></div>
             <i aria-hidden="true" />
           </div>
@@ -563,6 +576,12 @@ export default function Portfolio() {
           ))}
         </div>
       </div>
+      <div className="signal-rack" aria-label={language === "es" ? "Criterios de edición" : "Editing principles"}>
+        {c.signals.map(([title, note], index) => {
+          const icons = [<Clapperboard key="story" />, <Gauge key="pace" />, <WandSparkles key="motion" />, <AudioLines key="sound" />];
+          return <article key={title}><span>{icons[index]}</span><div><b>{title}</b><small>{note}</small></div><i>0{index + 1}</i></article>;
+        })}
+      </div>
 
       <section className="section" id="trabajos">
         <div className="section-head reveal">
@@ -572,36 +591,42 @@ export default function Portfolio() {
 
         <div className="featured-grid reveal">
           <article className="project project-tall">
-            <video src="/media/strike-short-rabanito.mp4" autoPlay muted loop playsInline preload="metadata" />
+            <video src={media("/media/strike-short-rabanito.mp4")} autoPlay muted loop playsInline preload="metadata" />
             <div className="project-info">
-              <div className="project-person"><img src="/media/rabanito-avatar.jpg" alt="" /><div><h3>Rabanito</h3><p>{c.work.rabanito}</p></div></div>
+              <div className="project-person"><img src={media("/media/rabanito-avatar.jpg")} alt="" /><div><h3>Rabanito</h3><p>{c.work.rabanito}</p></div></div>
               <a className="arrow-link" href="https://www.instagram.com/reel/DYx3NZXx2_y/" target="_blank" rel="noreferrer" aria-label={`${c.work.view} Rabanito`}><ArrowUpRight /></a>
             </div>
           </article>
           <article className="project project-wide">
-            <video src="/media/strike-long-edit.mp4" autoPlay muted loop playsInline preload="metadata" />
+            <video src={media("/media/strike-long-edit.mp4")} autoPlay muted loop playsInline preload="metadata" />
             <div className="project-info">
-              <div className="project-person"><img src="/media/sara-guzo-avatar.jpg" alt="" /><div><h3>Sara Guzo</h3><p>{c.work.sara}</p></div></div>
+              <div className="project-person"><img src={media("/media/sara-guzo-avatar.jpg")} alt="" /><div><h3>Sara Guzo</h3><p>{c.work.sara}</p></div></div>
               <a className="arrow-link" href="https://www.youtube.com/watch?v=cQZ17KRDWQ0&t=82s" target="_blank" rel="noreferrer" aria-label={`${c.work.view} Sara Guzo`}><ArrowUpRight /></a>
             </div>
           </article>
           <article className="project project-poke">
-            <video src="/media/poke-elle-edit.mp4" autoPlay muted loop playsInline preload="metadata" />
+            <video src={media("/media/poke-elle-edit.mp4")} autoPlay muted loop playsInline preload="metadata" />
             <div className="project-info">
-              <div className="project-person"><img src="/media/poke-elle-avatar.jpg" alt="" /><div><h3>Poke Elle</h3><p>{c.work.poke}</p></div></div>
+              <div className="project-person"><img src={media("/media/poke-elle-avatar.jpg")} alt="" /><div><h3>Poke Elle</h3><p>{c.work.poke}</p></div></div>
               <a className="arrow-link" href="https://www.youtube.com/watch?v=AtEpxkVEJYA" target="_blank" rel="noreferrer" aria-label={`${c.work.view} Poke Elle`}><ArrowUpRight /></a>
             </div>
           </article>
         </div>
 
-        <div className="project-list reveal">
+        <div className="project-secondary-grid reveal">
           {[
-            ["01", "Maog", c.work.maog, "/media/maog-avatar.jpg", "https://youtu.be/aZ5Z5jDBg2U"],
-            ["02", "Megazote", c.work.megazote, "/media/megazote-avatar.jpg", "https://www.youtube.com/shorts/ZF2gdtDNE4w"],
-          ].map(([index, name, type, avatar, url]) => (
-            <a className="project-row" href={url} target="_blank" rel="noreferrer" key={name}>
-              <span>{index}</span><img src={avatar} alt="" /><b>{name}</b><small>{type}</small><ArrowUpRight size={18} />
-            </a>
+            ["Maog", c.work.maog, "/media/maog-avatar.jpg", "/media/maog-terraria.mp4", "https://youtu.be/aZ5Z5jDBg2U"],
+            ["Megazote", c.work.megazote, "/media/megazote-avatar.jpg", "/media/megazote-roblox.mp4", "https://www.youtube.com/shorts/ZF2gdtDNE4w"],
+          ].map(([name, type, avatar, clip, url], index) => (
+            <article className="project-secondary" key={name}>
+              <video src={media(clip)} autoPlay muted loop playsInline preload="metadata" />
+              <div className="project-secondary-shade" />
+              <span className="project-secondary-index">0{index + 4}</span>
+              <div className="project-info">
+                <div className="project-person"><img src={media(avatar)} alt="" /><div><h3>{name}</h3><p>{type}</p></div></div>
+                <a className="arrow-link" href={url} target="_blank" rel="noreferrer" aria-label={`${c.work.view} ${name}`}><ArrowUpRight /></a>
+              </div>
+            </article>
           ))}
         </div>
       </section>
@@ -692,7 +717,7 @@ export default function Portfolio() {
         </div>
         <p className="source-note reveal">{c.pricing.source}</p>
         <div className="cat-card cat-price reveal">
-          <img src="/media/cat-computer.webp" alt="" />
+          <img src={media("/media/cat-typing.gif")} alt="" />
           <span><b>{c.pricing.assistant}</b><small>{c.pricing.assistantNote}</small></span>
         </div>
       </section>
@@ -709,7 +734,7 @@ export default function Portfolio() {
           <div className="xoma-window">
             <div className="xoma-titlebar"><span><i /> XOMACITO / MOTOR 3.0</span><b>— □ ×</b></div>
             <div className="xoma-screen">
-              <img src="/media/xomacito-interface.png" alt="Xomacito 3.0" />
+              <img src={media("/media/xomacito-interface.png")} alt="Xomacito 3.0" />
               <i className="xoma-scan" aria-hidden="true" />
             </div>
             <div className="xoma-status"><span>{c.xoma.status}</span><b>YT · TT · IG · VIMEO</b></div>
@@ -728,7 +753,7 @@ export default function Portfolio() {
               <article className="collab-card" key={item.name}>
                 <div className="collab-top"><span>{c.collab.cardLabel} / 0{index + 1}</span><b>{language.toUpperCase()}</b></div>
                 <p>{item[language].note}</p>
-                <div className="collab-person"><img src={item.avatar} alt="" /><div><b>{item.name}</b><small>{item[language].type}</small></div></div>
+                <div className="collab-person"><img src={media(item.avatar)} alt="" /><div><b>{item.name}</b><small>{item[language].type}</small></div></div>
               </article>
             ))}
           </div>
@@ -746,11 +771,9 @@ export default function Portfolio() {
         <h2>{c.contact.title[0]} <em>{c.contact.title[1]}</em></h2>
         <p>{c.contact.lead}</p>
         <div className="contact-actions">
-          <button className="button" onClick={copyDiscord}>
-            {copied ? <Check size={18} /> : <FaDiscord size={18} />}
-            {copied ? c.contact.copied : c.contact.discord}
-            {copied ? null : <Copy size={14} />}
-          </button>
+          <a className="button" href="https://discord.com/app" target="_blank" rel="noreferrer">
+            <FaDiscord size={18} /> {c.contact.discord} <ArrowUpRight size={14} />
+          </a>
           <a className="button secondary" href="https://www.youtube.com/@ElStrikew" target="_blank" rel="noreferrer"><FaYoutube size={19} /> YouTube <ArrowUpRight size={15} /></a>
         </div>
       </section>
