@@ -12,9 +12,10 @@ import {
   MessageCircle,
   Play,
   Sparkles,
-  Video,
   Zap,
 } from "lucide-react";
+import { FaDiscord, FaYoutube } from "react-icons/fa6";
+import { SiDavinciresolve } from "react-icons/si";
 
 type Format = "vertical" | "horizontal";
 type Tier = "basic" | "intermediate" | "complex";
@@ -50,6 +51,24 @@ const collaborators = [
   { name: "Megazote", type: "Short-form", avatar: "/media/megazote-avatar.jpg", note: "Directo al punto, pero nunca plano. Cada segundo tiene algo que empuja al siguiente.", language: "ES" },
   { name: "Poke Elle", type: "Entertainment", avatar: "/media/poke-elle-avatar.jpg", note: "Bright, quick, and playful. The edit keeps the energy up without getting in the way of her personality.", language: "EN" },
 ];
+
+const tools = [
+  { code: "Pr", name: "Premiere Pro", tone: "premiere" },
+  { code: "Ae", name: "After Effects", tone: "after" },
+  { code: "Ps", name: "Photoshop", tone: "photoshop" },
+  { code: "Ai", name: "Illustrator", tone: "illustrator" },
+  { code: "Cc", name: "CapCut", tone: "capcut" },
+];
+
+function Mascot({ src, className, caption }: { src: string; className: string; caption?: string }) {
+  return (
+    <div className={`mascot ${className}`} aria-hidden="true">
+      <span className="mascot-orbit" />
+      <img src={src} alt="" />
+      {caption && <small>{caption}</small>}
+    </div>
+  );
+}
 
 function ParticleField({ pointer }: { pointer: React.MutableRefObject<{ x: number; y: number }> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -164,7 +183,7 @@ export default function Portfolio() {
       (entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("visible")),
       { threshold: 0.12 },
     );
-    const nodes = document.querySelectorAll(".reveal");
+    const nodes = document.querySelectorAll(".reveal, .mascot");
     nodes.forEach((node) => observer.observe(node));
     return () => observer.disconnect();
   }, []);
@@ -172,6 +191,18 @@ export default function Portfolio() {
   useEffect(() => {
     const timer = window.setInterval(() => setSlide((value) => (value + 1) % collaborators.length), 5200);
     return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const updateScroll = () => {
+      const target = shell.current;
+      if (!target) return;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      target.style.setProperty("--scroll-progress", `${max > 0 ? (window.scrollY / max) * 100 : 0}%`);
+    };
+    updateScroll();
+    window.addEventListener("scroll", updateScroll, { passive: true });
+    return () => window.removeEventListener("scroll", updateScroll);
   }, []);
 
   const selectFormat = (next: Format) => {
@@ -193,6 +224,8 @@ export default function Portfolio() {
     target.style.setProperty("--my", `${event.clientY}px`);
     target.style.setProperty("--tilt-x", `${(event.clientX / window.innerWidth - 0.5) * 9}deg`);
     target.style.setProperty("--tilt-y", `${(event.clientY / window.innerHeight - 0.5) * -8}deg`);
+    target.style.setProperty("--shift-x", `${(event.clientX / window.innerWidth - 0.5) * 13}px`);
+    target.style.setProperty("--shift-y", `${(event.clientY / window.innerHeight - 0.5) * 10}px`);
   };
 
   return (
@@ -201,7 +234,7 @@ export default function Portfolio() {
       <div className="screen-vignette" aria-hidden="true" />
       <nav className="nav" aria-label="Navegación principal">
         <a className="brand" href="#inicio" aria-label="Strike, inicio">
-          <span className="brand-mark">S</span><span>STRIKE</span>
+          <span className="brand-mark"><img src="/media/strike-explicando.webp" alt="" /></span><span>YO ESE</span><small>EDITOR</small>
         </a>
         <div className="nav-links">
           <a href="#trabajos">Trabajo</a>
@@ -209,16 +242,20 @@ export default function Portfolio() {
           <a href="#precios">Precios</a>
           <a href="#contacto">Contacto</a>
         </div>
-        <div className="nav-status"><span>Disponible para proyectos</span></div>
+        <div className="nav-side">
+          <a href="https://www.youtube.com/@ElStrikew" target="_blank" rel="noreferrer" aria-label="YouTube de Strike"><FaYoutube /></a>
+          <button onClick={copyDiscord} aria-label="Copiar usuario de Discord"><FaDiscord /></button>
+          <div className="nav-status"><span>Disponible</span></div>
+        </div>
       </nav>
 
       <header className="hero" id="inicio">
         <div className="hero-copyblock">
           <p className="kicker hero-kicker">Video editor · Motion · Storytelling</p>
-          <h1 aria-label="Cada segundo cuenta">
-            <span className="title-line"><i>Cada</i></span>
-            <span className="title-line"><i>segundo</i></span>
-            <span className="title-line accent"><i>cuenta.</i></span>
+          <h1 aria-label="Esto va a ser épico papus">
+            <span className="title-line"><i>Esto va</i></span>
+            <span className="title-line"><i>a ser</i></span>
+            <span className="title-line accent"><i>épico papus.</i></span>
           </h1>
           <p className="hero-intro">
             Soy Strike, puedo retener tanto tu atención que no te diste cuenta que estás leyendo esto ahora mismo... ¿en serio alguien lee esto??
@@ -237,8 +274,8 @@ export default function Portfolio() {
             <i className="scrub-line" aria-hidden="true" />
           </div>
           <div className="identity-card">
-            <span className="identity-avatar"><img src="/media/strike-avatar.png" alt="Avatar de Strike" /></span>
-            <div><small>Editor / Motion</small><strong>STRIKE</strong><em>sí, el del sombrero</em></div>
+            <span className="identity-avatar"><img src="/media/strike-explicando.webp" alt="Personaje de Strike" /></span>
+            <div><small>Editor / Motion</small><strong>STRIKE</strong><em>sí, ese soy yo</em></div>
             <i aria-hidden="true" />
           </div>
           <div className="orbit-object" aria-hidden="true">
@@ -259,13 +296,26 @@ export default function Portfolio() {
         </div>
       </div>
 
+      <div className="toolbelt" aria-label="Herramientas que usa Strike">
+        <span className="toolbelt-label">MI ARSENAL, DIGO... MIS PROGRAMAS</span>
+        <div className="toolbelt-items">
+          {tools.map((tool, index) => (
+            <div className="tool-chip" style={{ "--tool-index": index } as React.CSSProperties} key={tool.name} title={tool.name}>
+              <b className={tool.tone}>{tool.code}</b><span>{tool.name}</span>
+            </div>
+          ))}
+          <div className="tool-chip" title="DaVinci Resolve"><b className="resolve"><SiDavinciresolve /></b><span>DaVinci</span></div>
+        </div>
+      </div>
+
       <section className="section" id="trabajos">
         <div className="section-head reveal">
-          <div><p className="kicker">01 / Trabajo seleccionado</p><h2>Primero,<br />el resultado.</h2></div>
+          <div><p className="kicker">01 / Trabajo seleccionado</p><h2>Checa mi<br /><em>edición.</em></h2></div>
           <p className="section-lead">
-            Una selección compacta para evaluar ritmo, narrativa y acabado sin buscar demasiado.
+            Aquí coloqué una selección compacta en donde puedes evaluar mi ritmo de edición, además de algunos efectos que podrían gustarte.
           </p>
         </div>
+        <Mascot src="/media/strike-senalando-feliz.webp" className="mascot-work mascot-parallax" caption="Mira nomás esa edición ↘" />
 
         <div className="featured-grid reveal">
           <article className="project project-tall">
@@ -305,11 +355,12 @@ export default function Portfolio() {
 
       <section className="section" id="proceso">
         <div className="section-head reveal">
-          <div><p className="kicker">02 / Cómo trabajo</p><h2>Ordenado.<br /><em>Más o menos.</em></h2></div>
+          <div><p className="kicker">02 / Cómo trabajo</p><h2>Soy el mejor!!<br /><em>por un precio razonable, claro jeje.</em></h2></div>
           <p className="section-lead">
-            Mi timeline puede parecer una ciudad vista desde arriba. Tu proceso, no: siempre sabes qué necesito y cuándo llega el corte.
+            Me gusta planificar cada video y mantener una comunicación sólida con mis clientes. Menos confusión, mejores cortes y cero desapariciones misteriosas.
           </p>
         </div>
+        <Mascot src="/media/strike-pensando.webp" className="mascot-process mascot-parallax" caption="Planificando cosas muy serias..." />
         <div className="process-ribbon reveal" aria-hidden="true">
           <span>BRIEF</span><i /><span>STORY</span><i /><span>RHYTHM</span><i /><span>DELIVERY</span>
         </div>
@@ -327,16 +378,17 @@ export default function Portfolio() {
             </article>
           ))}
         </div>
-        <p className="process-aside reveal">* “¿Puedes hacerlo más dinámico?” Sí. Pero primero dime qué quieres que sienta la gente.</p>
+        <p className="process-aside reveal">* “¿Puedes hacerlo más dinámico?” Sí... pero ¿podrás pagarlo? :0 ???</p>
       </section>
 
       <section className="section" id="precios">
         <div className="section-head reveal">
-          <div><p className="kicker">03 / Estimador</p><h2>Precio claro.<br />Control tuyo.</h2></div>
+          <div><p className="kicker">03 / Estimador</p><h2>Aquí viene lo que más duele:<br /><em>el precio jeje.</em></h2></div>
           <p className="section-lead">
             Selecciona formato, nivel y duración. La referencia cambia al instante y parte de tarifas mínimas profesionales actualizadas.
           </p>
         </div>
+        <Mascot src="/media/strike-asustado.webp" className="mascot-price mascot-parallax" caption="Respira... son dólares." />
 
         <div className="format-switch reveal" role="group" aria-label="Formato del video">
           <button className={format === "vertical" ? "active" : ""} onClick={() => selectFormat("vertical")}>
@@ -398,6 +450,10 @@ export default function Portfolio() {
         <p className="source-note reveal">
           Referencia: encuesta BuscoEditor 2025 · 140 editores · tarifas base ajustadas. La edición compleja vertical se establece en US$60. El estado del material y requerimientos fuera de alcance pueden modificar la cotización final (tu presupuesto tampoco debería tener jumpscares).
         </p>
+        <div className="cat-card cat-price reveal">
+          <img src="/media/cat-computer.webp" alt="Gatito usando una computadora" />
+          <span><b>ASISTENTE FINANCIERO</b><small>No sabe matemáticas, pero juzga tu presupuesto.</small></span>
+        </div>
       </section>
 
       <section className="section reveal">
@@ -424,9 +480,9 @@ export default function Portfolio() {
 
       <section className="section" aria-labelledby="collab-title">
         <div className="section-head reveal">
-          <div><p className="kicker">05 / Colaboraciones</p><h2 id="collab-title">Distintos canales.<br />Un criterio.</h2></div>
+          <div><p className="kicker">05 / Colaboraciones</p><h2 id="collab-title">Referencias de clientes<br /><em>con los que trabajé.</em></h2></div>
           <p className="section-lead">
-            No son frases corporativas ni “sinergia audiovisual”. Es la manera más honesta de explicar cómo se siente cada edición.
+            Entregué tan buenos resultados que sigo trabajando con ellos. Sí, debido a lo bueno que soy. La humildad se exportó en baja resolución.
           </p>
         </div>
         <div className="collab-window reveal">
@@ -450,16 +506,18 @@ export default function Portfolio() {
       <section className="contact reveal" id="contacto">
         <div className="contact-grid" aria-hidden="true" />
         <p className="kicker light">Contacto directo · Lima / remoto</p>
-        <h2>¿Tienes material? <em>Hagámoslo contar.</em></h2>
+        <h2>¿Quieres trabajar conmigo? <em>Contáctame en mis redes.</em></h2>
         <p>Envíame la duración, una referencia y tu fecha ideal. Prometo responder antes de que termines de ver “solo un reel más”.</p>
+        <Mascot src="/media/strike-explicando.webp" className="mascot-contact" caption="Es por aquí, papu ↙" />
         <div className="contact-actions">
           <button className="button" onClick={copyDiscord}>
-            {copied ? <Check size={18} /> : <MessageCircle size={18} />}
+            {copied ? <Check size={18} /> : <FaDiscord size={18} />}
             {copied ? "Usuario copiado" : "Discord · just_stream"}
             {copied ? null : <Copy size={14} />}
           </button>
-          <a className="button secondary" href="https://www.youtube.com/@ElStrikew" target="_blank" rel="noreferrer"><Video size={19} /> YouTube <ArrowUpRight size={15} /></a>
+          <a className="button secondary" href="https://www.youtube.com/@ElStrikew" target="_blank" rel="noreferrer"><FaYoutube size={19} /> YouTube <ArrowUpRight size={15} /></a>
         </div>
+        <div className="cat-window" aria-hidden="true"><img src="/media/cat-window.webp" alt="" /><span>strike_assistant.exe</span></div>
       </section>
 
       <footer className="footer">
