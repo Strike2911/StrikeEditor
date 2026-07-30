@@ -50,8 +50,8 @@ const collaborators = [
   {
     name: "Rabanito",
     avatar: "/media/rabanito-avatar.jpg",
-    es: { type: "Formato corto", note: "Strike entiende dónde meter el corte para que el chiste pegue. Seguimos trabajando porque ya conoce el tono del canal." },
-    en: { type: "Short-form", note: "Strike knows where to place the cut so the joke lands. We keep working together because he already understands the channel." },
+    es: { type: "Formato corto", note: "Es un editor increíble. Tiene muchísima creatividad, súper puntual y muy abierto al feedback. Trabajar con él es un gusto y va a llevar tu contenido a otro nivel." },
+    en: { type: "Short-form", note: "He is an incredible editor: highly creative, always on time, and very open to feedback. Working with him is a pleasure, and he will take your content to the next level." },
   },
   {
     name: "Sara Guzo",
@@ -113,7 +113,7 @@ const pageCopy = {
       role: "Editor / Motion",
       note: "sí, ese soy yo",
     },
-    arsenal: "MI ARSENAL, DIGO... MIS PROGRAMAS",
+    arsenal: "PROGRAMAS QUE DOMINO",
     signals: [
       ["Narrativa", "Cada corte empuja la historia."],
       ["Ritmo", "Pausa cuando toca. Acelera cuando conviene."],
@@ -215,7 +215,7 @@ const pageCopy = {
       role: "Editor / Motion",
       note: "yes, that's me",
     },
-    arsenal: "MY ARSENAL—I MEAN... MY SOFTWARE",
+    arsenal: "SOFTWARE I USE",
     signals: [
       ["Story", "Every cut moves the story forward."],
       ["Pacing", "Pause when needed. Move fast when it helps."],
@@ -439,6 +439,55 @@ function ParticleField({ pointer }: { pointer: React.MutableRefObject<{ x: numbe
   return <canvas ref={canvasRef} className="particle-canvas" aria-hidden="true" />;
 }
 
+function AnimatedMetric({ label, target }: { label: string; target: number }) {
+  const metric = useRef<HTMLSpanElement>(null);
+  const [active, setActive] = useState(false);
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    const node = metric.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setActive(true);
+        observer.disconnect();
+      },
+      { threshold: 0.45 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!active) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let frame = 0;
+    if (reduced) {
+      frame = window.requestAnimationFrame(() => setValue(target));
+      return () => window.cancelAnimationFrame(frame);
+    }
+    const start = performance.now();
+    const duration = 1350;
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - progress, 4);
+      setValue(Math.round(target * eased));
+      if (progress < 1) frame = window.requestAnimationFrame(tick);
+    };
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, [active, target]);
+
+  return (
+    <span ref={metric}>
+      <b>{label}</b>
+      <i><em style={{ width: active ? `${target}%` : "0%" }} /></i>
+      <small>{value}%</small>
+    </span>
+  );
+}
+
 export default function Portfolio() {
   const shell = useRef<HTMLElement>(null);
   const pointer = useRef({ x: -500, y: -500 });
@@ -580,6 +629,9 @@ export default function Portfolio() {
 
       <div className="toolbelt" aria-label={c.tools}>
         <span className="toolbelt-label">{c.arsenal}</span>
+        <span className="toolbelt-character" aria-hidden="true">
+          <img src={media("/media/strike-senalando-feliz.webp")} alt="" />
+        </span>
         <div className="toolbelt-items">
           {tools.map((tool, index) => (
             <div className="tool-chip" style={{ "--tool-index": index } as React.CSSProperties} key={tool.name} title={tool.name}>
@@ -634,6 +686,14 @@ export default function Portfolio() {
           ].map(({ name, type, avatar, clip, url, vertical }, index) => (
             <article className={`project-secondary ${vertical ? "vertical-clip" : ""}`} key={name}>
               <video src={media(clip)} autoPlay muted loop playsInline preload="metadata" />
+              {vertical && (
+                <div className="vertical-clip-ui" aria-hidden="true">
+                  <span>SHORT / 9:16</span>
+                  <strong>FORMATO<br />VERTICAL</strong>
+                  <div>{Array.from({ length: 9 }, (_, bar) => <i key={bar} style={{ "--bar": bar } as React.CSSProperties} />)}</div>
+                  <small>RITMO / RETENCIÓN</small>
+                </div>
+              )}
               <div className="project-secondary-shade" />
               <span className="project-secondary-index">0{index + 4}</span>
               <div className="project-info">
@@ -652,17 +712,31 @@ export default function Portfolio() {
           <div><p className="kicker">{c.process.kicker}</p><h2>{c.process.title[0]}<br /><em>{c.process.title[1]}</em></h2></div>
           <p className="section-lead">{c.process.lead}</p>
         </div>
-        <div className="process-ribbon reveal" aria-hidden="true">
-          <span>{c.process.ribbon[0]}</span><i /><span>{c.process.ribbon[1]}</span><i /><span>{c.process.ribbon[2]}</span><i /><span>{c.process.ribbon[3]}</span>
-        </div>
-        <div className="process reveal">
-          {c.process.steps.map(([title, note, tag], index) => (
-            <article className="step" key={title}>
-              <div className="step-top"><span>0{index + 1}</span><b>{tag}</b></div>
-              <div className="step-icon">{stepIcons[index]}</div>
-              <h3>{title}</h3><p>{note}</p><i aria-hidden="true" />
-            </article>
-          ))}
+        <div className="process-console reveal">
+          <div className="process-console-bar">
+            <span><i /><i /><i /> STRIKE_EDIT / TIMELINE_01</span>
+            <div className="process-character">
+              <img src={media("/media/strike-explicando.webp")} alt="" />
+              <small>{language === "es" ? "Planifico primero. Después hacemos magia." : "Plan first. Then we make magic."}</small>
+            </div>
+            <b>00:00:24:12</b>
+          </div>
+          <div className="process-ribbon" aria-hidden="true">
+            <span>{c.process.ribbon[0]}</span><i /><span>{c.process.ribbon[1]}</span><i /><span>{c.process.ribbon[2]}</span><i /><span>{c.process.ribbon[3]}</span>
+          </div>
+          <div className="process-playhead" aria-hidden="true"><span /><b>PLAY</b></div>
+          <div className="process">
+            {c.process.steps.map(([title, note, tag], index) => (
+              <article className="step" key={title} tabIndex={0} style={{ "--step-index": index } as React.CSSProperties}>
+                <div className="step-top"><span>0{index + 1}</span><b>{tag}</b></div>
+                <div className="step-icon">{stepIcons[index]}</div>
+                <h3>{title}</h3><p>{note}</p>
+                <div className="step-wave" aria-hidden="true">
+                  {Array.from({ length: 12 }, (_, bar) => <i key={bar} style={{ "--bar": bar } as React.CSSProperties} />)}
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
         <p className="process-aside reveal">{c.process.aside}</p>
       </section>
@@ -736,9 +810,9 @@ export default function Portfolio() {
           <img src={media("/media/cat-typing.gif")} alt="" />
           <span className="cat-card-copy"><b>{c.pricing.assistant}</b><small>{c.pricing.assistantNote}</small></span>
           <div className="cat-card-metrics" aria-hidden="true">
-            <span><b>{language === "es" ? "RITMO" : "PACING"}</b><i><em style={{ width: "92%" }} /></i><small>92</small></span>
-            <span><b>MOTION</b><i><em style={{ width: "84%" }} /></i><small>84</small></span>
-            <span><b>{language === "es" ? "GATITOS" : "CATS"}</b><i><em style={{ width: "100%" }} /></i><small>144</small></span>
+            <AnimatedMetric label={language === "es" ? "RITMO" : "PACING"} target={92} />
+            <AnimatedMetric label="MOTION" target={84} />
+            <AnimatedMetric label={language === "es" ? "GATITOS" : "CATS"} target={100} />
           </div>
         </div>
       </section>
@@ -816,7 +890,6 @@ export default function Portfolio() {
 
       <footer className="footer">
         <span>© {new Date().getFullYear()} {c.footer[0]}</span>
-        <span>{c.footer[1]}</span>
       </footer>
     </main>
   );
