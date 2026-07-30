@@ -315,13 +315,16 @@ function ParticleField({ pointer }: { pointer: React.MutableRefObject<{ x: numbe
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const compact = window.matchMedia("(max-width: 640px)").matches;
     let frame = 0;
     let width = 0;
     let height = 0;
     let dpr = 1;
     let tick = 0;
+    let lastDraw = 0;
+    let pageVisible = !document.hidden;
     const trail: Array<{ x: number; y: number; life: number }> = [];
-    const particles = Array.from({ length: reduced ? 24 : 76 }, (_, index) => ({
+    const particles = Array.from({ length: reduced ? 18 : compact ? 22 : 38 }, (_, index) => ({
       x: Math.random(),
       y: Math.random(),
       vx: (Math.random() - 0.5) * 0.00026,
@@ -333,7 +336,7 @@ function ParticleField({ pointer }: { pointer: React.MutableRefObject<{ x: numbe
     const resize = () => {
       width = window.innerWidth;
       height = window.innerHeight;
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, 1.35);
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       canvas.style.width = `${width}px`;
@@ -341,23 +344,20 @@ function ParticleField({ pointer }: { pointer: React.MutableRefObject<{ x: numbe
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
-    const draw = () => {
+    const draw = (time = 0) => {
+      if (!pageVisible) return;
+      if (!reduced && time - lastDraw < 32) {
+        frame = window.requestAnimationFrame(draw);
+        return;
+      }
+      lastDraw = time;
       tick += 1;
       ctx.clearRect(0, 0, width, height);
       const pointerActive = pointer.current.x >= 0 && pointer.current.x <= width;
 
       if (!reduced && pointerActive && tick % 2 === 0) {
         trail.push({ x: pointer.current.x, y: pointer.current.y, life: 1 });
-        if (trail.length > 24) trail.shift();
-      }
-
-      if (pointerActive) {
-        const glow = ctx.createRadialGradient(pointer.current.x, pointer.current.y, 0, pointer.current.x, pointer.current.y, 190);
-        glow.addColorStop(0, "rgba(36,87,255,.12)");
-        glow.addColorStop(0.42, "rgba(36,87,255,.045)");
-        glow.addColorStop(1, "rgba(36,87,255,0)");
-        ctx.fillStyle = glow;
-        ctx.fillRect(pointer.current.x - 190, pointer.current.y - 190, 380, 380);
+        if (trail.length > 10) trail.shift();
       }
 
       trail.forEach((point, index) => {
@@ -409,7 +409,7 @@ function ParticleField({ pointer }: { pointer: React.MutableRefObject<{ x: numbe
         ctx.arc(px, py, particle.size, 0, Math.PI * 2);
         ctx.fill();
 
-        for (let next = index + 1; next < Math.min(index + 7, particles.length); next += 1) {
+        for (let next = index + 1; next < Math.min(index + 4, particles.length); next += 1) {
           const other = particles[next];
           const ox = other.x * width;
           const oy = other.y * height;
@@ -427,16 +427,66 @@ function ParticleField({ pointer }: { pointer: React.MutableRefObject<{ x: numbe
       if (!reduced) frame = window.requestAnimationFrame(draw);
     };
 
+    const handleVisibility = () => {
+      pageVisible = !document.hidden;
+      if (pageVisible && !reduced) frame = window.requestAnimationFrame(draw);
+    };
+
     resize();
     window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", handleVisibility);
     draw();
     return () => {
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", handleVisibility);
       window.cancelAnimationFrame(frame);
     };
   }, [pointer]);
 
   return <canvas ref={canvasRef} className="particle-canvas" aria-hidden="true" />;
+}
+
+function PortfolioVideo({ src, className }: { src: string; className?: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    let inView = false;
+    const syncPlayback = () => {
+      if (inView && document.visibilityState === "visible") {
+        void video.play().catch(() => undefined);
+      } else {
+        video.pause();
+      }
+    };
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+        syncPlayback();
+      },
+      { rootMargin: "160px 0px", threshold: 0.08 },
+    );
+    observer.observe(video);
+    document.addEventListener("visibilitychange", syncPlayback);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", syncPlayback);
+      video.pause();
+    };
+  }, []);
+
+  return <video ref={videoRef} className={className} src={src} muted loop playsInline preload="metadata" />;
+}
+
+function ContextLedger({ items }: { items: readonly (readonly [string, string])[] }) {
+  return (
+    <div className="context-ledger" aria-label="Datos rápidos">
+      {items.map(([value, label], index) => (
+        <span key={`${value}-${label}`}><i>0{index + 1}</i><b>{value}</b><small>{label}</small></span>
+      ))}
+    </div>
+  );
 }
 
 function AnimatedMetric({ label, target }: { label: string; target: number }) {
@@ -491,6 +541,7 @@ function AnimatedMetric({ label, target }: { label: string; target: number }) {
 export default function Portfolio() {
   const shell = useRef<HTMLElement>(null);
   const pointer = useRef({ x: -500, y: -500 });
+  const pointerFrame = useRef(0);
   const [language, setLanguage] = useState<Language>("es");
   const [format, setFormat] = useState<Format>("vertical");
   const [tier, setTier] = useState<Tier>("intermediate");
@@ -533,6 +584,8 @@ export default function Portfolio() {
     return () => window.removeEventListener("scroll", updateScroll);
   }, []);
 
+  useEffect(() => () => window.cancelAnimationFrame(pointerFrame.current), []);
+
   const selectFormat = (next: Format) => {
     setFormat(next);
     setAmount(next === "vertical" ? 1 : 10);
@@ -542,12 +595,17 @@ export default function Portfolio() {
     const target = shell.current;
     pointer.current = { x: event.clientX, y: event.clientY };
     if (!target) return;
-    target.style.setProperty("--mx", `${event.clientX}px`);
-    target.style.setProperty("--my", `${event.clientY}px`);
-    target.style.setProperty("--tilt-x", `${(event.clientX / window.innerWidth - 0.5) * 9}deg`);
-    target.style.setProperty("--tilt-y", `${(event.clientY / window.innerHeight - 0.5) * -8}deg`);
-    target.style.setProperty("--shift-x", `${(event.clientX / window.innerWidth - 0.5) * 13}px`);
-    target.style.setProperty("--shift-y", `${(event.clientY / window.innerHeight - 0.5) * 10}px`);
+    if (pointerFrame.current) return;
+    pointerFrame.current = window.requestAnimationFrame(() => {
+      const { x, y } = pointer.current;
+      target.style.setProperty("--mx", `${x}px`);
+      target.style.setProperty("--my", `${y}px`);
+      target.style.setProperty("--tilt-x", `${(x / window.innerWidth - 0.5) * 9}deg`);
+      target.style.setProperty("--tilt-y", `${(y / window.innerHeight - 0.5) * -8}deg`);
+      target.style.setProperty("--shift-x", `${(x / window.innerWidth - 0.5) * 13}px`);
+      target.style.setProperty("--shift-y", `${(y / window.innerHeight - 0.5) * 10}px`);
+      pointerFrame.current = 0;
+    });
   };
 
   const stepIcons = [<MessageCircle key="brief" />, <Layers3 key="structure" />, <Sparkles key="edit" />, <Check key="delivery" />];
@@ -555,6 +613,7 @@ export default function Portfolio() {
   return (
     <main ref={shell} className="site-shell" onPointerMove={updatePointer}>
       <ParticleField pointer={pointer} />
+      <div className="pointer-glow" aria-hidden="true" />
       <div className="screen-vignette" aria-hidden="true" />
       <nav className="nav" aria-label={c.nav.label}>
         <a className="brand brand-easter" href="#inicio" aria-label="Strike Editor, inicio">
@@ -599,7 +658,7 @@ export default function Portfolio() {
 
         <div className="hero-stage">
           <div className="hero-media">
-            <video src={media("/media/poke-elle-edit.mp4")} autoPlay muted loop playsInline preload="metadata" />
+            <PortfolioVideo src={media("/media/poke-elle-edit.mp4")} />
             <span className="media-label"><Play size={11} fill="currentColor" /> {c.hero.selected}</span>
             <span className="media-time">Poke Elle</span>
             <i className="scrub-line" aria-hidden="true" />
@@ -644,29 +703,34 @@ export default function Portfolio() {
         })}
       </div>
 
-      <section className="section" id="trabajos">
+      <section className="section" id="trabajos" data-index="01" data-label={language === "es" ? "SELECCIÓN" : "SELECTION"}>
         <div className="section-head reveal">
           <div><p className="kicker">{c.work.kicker}</p><h2>{c.work.title[0]}<br /><em>{c.work.title[1]}</em></h2></div>
-          <p className="section-lead">{c.work.lead}</p>
+          <div className="section-context">
+            <p className="section-lead">{c.work.lead}</p>
+            <ContextLedger items={language === "es"
+              ? [["07", "CLIENTES"], ["02", "FORMATOS"], ["ES/EN", "IDIOMAS"]]
+              : [["07", "CLIENTS"], ["02", "FORMATS"], ["ES/EN", "LANGUAGES"]]} />
+          </div>
         </div>
 
         <div className="featured-grid reveal">
           <article className="project project-tall">
-            <video src={media("/media/strike-short-rabanito.mp4")} autoPlay muted loop playsInline preload="metadata" />
+            <PortfolioVideo src={media("/media/strike-short-rabanito.mp4")} />
             <div className="project-info">
               <div className="project-person"><img src={media("/media/rabanito-avatar.jpg")} alt="" /><div><h3>Rabanito</h3><p>{c.work.rabanito}</p></div></div>
               <a className="arrow-link" href="https://www.instagram.com/reel/DYx3NZXx2_y/" target="_blank" rel="noreferrer" aria-label={`${c.work.view} Rabanito`}><ArrowUpRight /></a>
             </div>
           </article>
           <article className="project project-wide">
-            <video src={media("/media/strike-long-edit.mp4")} autoPlay muted loop playsInline preload="metadata" />
+            <PortfolioVideo src={media("/media/strike-long-edit.mp4")} />
             <div className="project-info">
               <div className="project-person"><img src={media("/media/sara-guzo-avatar.jpg")} alt="" /><div><h3>Sara Guzo</h3><p>{c.work.sara}</p></div></div>
               <a className="arrow-link" href="https://www.youtube.com/watch?v=cQZ17KRDWQ0&t=82s" target="_blank" rel="noreferrer" aria-label={`${c.work.view} Sara Guzo`}><ArrowUpRight /></a>
             </div>
           </article>
           <article className="project project-poke">
-            <video src={media("/media/poke-elle-edit.mp4")} autoPlay muted loop playsInline preload="metadata" />
+            <PortfolioVideo src={media("/media/poke-elle-edit.mp4")} />
             <div className="project-info">
               <div className="project-person"><img src={media("/media/poke-elle-avatar.jpg")} alt="" /><div><h3>Poke Elle</h3><p>{c.work.poke}</p></div></div>
               <a className="arrow-link" href="https://www.youtube.com/watch?v=AtEpxkVEJYA" target="_blank" rel="noreferrer" aria-label={`${c.work.view} Poke Elle`}><ArrowUpRight /></a>
@@ -682,7 +746,7 @@ export default function Portfolio() {
             { name: "Nini", type: c.work.nini, avatar: "/media/nini-avatar.png", clip: "/media/nini-poppy-playtime.mp4", wide: true },
           ].map(({ name, type, avatar, clip, url, vertical, wide }, index) => (
             <article className={`project-secondary ${vertical ? "vertical-clip" : ""} ${wide ? "wide-clip" : ""}`} key={name}>
-              <video src={media(clip)} autoPlay muted loop playsInline preload="metadata" />
+              <PortfolioVideo src={media(clip)} />
               <div className="project-secondary-shade" />
               <span className="project-secondary-index">0{index + 4}</span>
               <div className="project-info">
@@ -696,10 +760,15 @@ export default function Portfolio() {
         </div>
       </section>
 
-      <section className="section" id="proceso">
+      <section className="section" id="proceso" data-index="02" data-label={language === "es" ? "PROCESO" : "PROCESS"}>
         <div className="section-head reveal">
           <div><p className="kicker">{c.process.kicker}</p><h2>{c.process.title[0]}<br /><em>{c.process.title[1]}</em></h2></div>
-          <p className="section-lead">{c.process.lead}</p>
+          <div className="section-context">
+            <p className="section-lead">{c.process.lead}</p>
+            <ContextLedger items={language === "es"
+              ? [["04", "ETAPAS"], ["01", "RONDA"], ["24H", "RESPUESTA"]]
+              : [["04", "STAGES"], ["01", "ROUND"], ["24H", "REPLY"]]} />
+          </div>
         </div>
         <div className="process-console reveal">
           <div className="process-console-bar">
@@ -726,10 +795,15 @@ export default function Portfolio() {
         <p className="process-aside reveal">{c.process.aside}</p>
       </section>
 
-      <section className="section" id="precios">
+      <section className="section" id="precios" data-index="03" data-label={language === "es" ? "COTIZACIÓN" : "ESTIMATE"}>
         <div className="section-head reveal">
           <div><p className="kicker">{c.pricing.kicker}</p><h2>{c.pricing.title[0]}<br /><em>{c.pricing.title[1]}</em></h2></div>
-          <p className="section-lead">{c.pricing.lead}</p>
+          <div className="section-context">
+            <p className="section-lead">{c.pricing.lead}</p>
+            <ContextLedger items={language === "es"
+              ? [["$17", "DESDE"], ["01", "AJUSTE"], ["100%", "CLARO"]]
+              : [["$17", "FROM"], ["01", "REVISION"], ["100%", "CLEAR"]]} />
+          </div>
         </div>
 
         <div className="format-switch reveal" role="group" aria-label={c.pricing.formatAria}>
@@ -802,7 +876,7 @@ export default function Portfolio() {
         </div>
       </section>
 
-      <section className="section reveal">
+      <section className="section reveal" data-index="04" data-label="XOMACITO">
         <div className="split-feature">
           <div>
             <p className="kicker light">{c.xoma.kicker}</p>
@@ -822,10 +896,15 @@ export default function Portfolio() {
         </div>
       </section>
 
-      <section className="section" aria-labelledby="collab-title">
+      <section className="section" aria-labelledby="collab-title" data-index="05" data-label={language === "es" ? "REFERENCIAS" : "REFERENCES"}>
         <div className="section-head reveal">
           <div><p className="kicker">{c.collab.kicker}</p><h2 id="collab-title">{c.collab.title[0]}<br /><em>{c.collab.title[1]}</em></h2></div>
-          <p className="section-lead">{c.collab.lead}</p>
+          <div className="section-context">
+            <p className="section-lead">{c.collab.lead}</p>
+            <ContextLedger items={language === "es"
+              ? [["07", "RESEÑAS"], ["REAL", "FEEDBACK"], ["∞", "CONFIANZA"]]
+              : [["07", "REVIEWS"], ["REAL", "FEEDBACK"], ["∞", "TRUST"]]} />
+          </div>
         </div>
         <div
           className="collab-window reveal"
