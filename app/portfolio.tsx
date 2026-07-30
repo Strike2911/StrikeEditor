@@ -77,6 +77,18 @@ const collaborators = [
     es: { type: "Entretenimiento", note: "Strike entiende la energía que busco y hace que la edición sea divertida sin volverla abrumadora." },
     en: { type: "Entertainment", note: "Strike understands the energy I want and makes the edits feel fun without making them overwhelming." },
   },
+  {
+    name: "Rykozio",
+    avatar: "/media/rykozio-avatar.png",
+    es: { type: "Contenido digital", note: "Strike respeta la esencia del canal y eleva el nivel de cada proyecto. Trabajar con él te ahorra tiempo y asegura un resultado impecable." },
+    en: { type: "Digital content", note: "Strike respects the essence of the channel and raises the level of every project. Working with him saves you time and ensures a polished result." },
+  },
+  {
+    name: "Nini",
+    avatar: "/media/nini-avatar.png",
+    es: { type: "Contenido digital", note: "Strike es una persona súper responsable y abierta a cambios, uno de los mejores editores con los que he trabajado. Su trabajo queda súper limpio, bonito y profesional. Está increíble." },
+    en: { type: "Digital content", note: "Strike is super responsible and always open to changes—one of the best editors I’ve worked with. His work comes out clean, polished, and professional. It’s incredible." },
+  },
 ] as const;
 
 const tools = [
@@ -433,6 +445,7 @@ export default function Portfolio() {
   const [urgent, setUrgent] = useState(false);
   const [slide, setSlide] = useState(0);
   const c = pageCopy[language];
+  const lastDesktopSlide = Math.max(0, collaborators.length - 3);
 
   const price = useMemo(() => {
     const base = format === "vertical"
@@ -453,11 +466,6 @@ export default function Portfolio() {
     const nodes = document.querySelectorAll(".reveal");
     nodes.forEach((node) => observer.observe(node));
     return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => setSlide((value) => (value + 1) % collaborators.length), 5200);
-    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -516,7 +524,7 @@ export default function Portfolio() {
             <button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")} aria-pressed={language === "en"}><span aria-hidden="true">🇺🇸</span><b>EN</b></button>
           </div>
           <a href="https://www.youtube.com/@ElStrikew" target="_blank" rel="noreferrer" aria-label="YouTube de Strike"><FaYoutube /></a>
-          <a href="https://discord.com/app" target="_blank" rel="noreferrer" aria-label="Discord"><FaDiscord /></a>
+          <a href="https://discord.gg/KNh3ZtNkUu" target="_blank" rel="noreferrer" aria-label="Discord para clientes"><FaDiscord /></a>
           <div className="nav-status"><span>{c.nav.available}</span></div>
         </div>
       </nav>
@@ -747,20 +755,35 @@ export default function Portfolio() {
           <div><p className="kicker">{c.collab.kicker}</p><h2 id="collab-title">{c.collab.title[0]}<br /><em>{c.collab.title[1]}</em></h2></div>
           <p className="section-lead">{c.collab.lead}</p>
         </div>
-        <div className="collab-window reveal">
+        <div
+          className="collab-window reveal"
+          role="region"
+          aria-roledescription={language === "es" ? "carrusel de testimonios" : "testimonial carousel"}
+          aria-label={language === "es" ? "Referencias de clientes" : "Client references"}
+        >
           <div className="collab-track" style={{ transform: `translateX(-${slide * 34}%)` }}>
             {collaborators.map((item, index) => (
-              <article className="collab-card" key={item.name}>
+              <article
+                className="collab-card"
+                key={item.name}
+                role="group"
+                aria-label={`${index + 1} / ${collaborators.length}: ${item.name}`}
+                tabIndex={0}
+              >
                 <div className="collab-top"><span>{c.collab.cardLabel} / 0{index + 1}</span><b>{language.toUpperCase()}</b></div>
                 <p>{item[language].note}</p>
                 <div className="collab-person"><img src={media(item.avatar)} alt="" /><div><b>{item.name}</b><small>{item[language].type}</small></div></div>
               </article>
             ))}
           </div>
+          <p className="mobile-swipe-hint" aria-hidden="true">
+            <span>{language === "es" ? "Desliza para leer más" : "Swipe to read more"}</span>
+            <span>→</span>
+          </p>
           <div className="carousel-controls">
-            <button onClick={() => setSlide((slide - 1 + collaborators.length) % collaborators.length)} aria-label={c.collab.previous}>←</button>
+            <button onClick={() => setSlide((current) => (current - 1 + lastDesktopSlide + 1) % (lastDesktopSlide + 1))} aria-label={c.collab.previous}>←</button>
             <span>0{slide + 1} / 0{collaborators.length}</span>
-            <button onClick={() => setSlide((slide + 1) % collaborators.length)} aria-label={c.collab.next}>→</button>
+            <button onClick={() => setSlide((current) => (current + 1) % (lastDesktopSlide + 1))} aria-label={c.collab.next}>→</button>
           </div>
         </div>
       </section>
@@ -771,7 +794,7 @@ export default function Portfolio() {
         <h2>{c.contact.title[0]} <em>{c.contact.title[1]}</em></h2>
         <p>{c.contact.lead}</p>
         <div className="contact-actions">
-          <a className="button" href="https://discord.com/app" target="_blank" rel="noreferrer">
+          <a className="button" href="https://discord.gg/KNh3ZtNkUu" target="_blank" rel="noreferrer">
             <FaDiscord size={18} /> {c.contact.discord} <ArrowUpRight size={14} />
           </a>
           <a className="button secondary" href="https://www.youtube.com/@ElStrikew" target="_blank" rel="noreferrer"><FaYoutube size={19} /> YouTube <ArrowUpRight size={15} /></a>
