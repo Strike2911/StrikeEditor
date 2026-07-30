@@ -629,9 +629,6 @@ export default function Portfolio() {
 
       <div className="toolbelt" aria-label={c.tools}>
         <span className="toolbelt-label">{c.arsenal}</span>
-        <span className="toolbelt-character" aria-hidden="true">
-          <img src={media("/media/strike-senalando-feliz.webp")} alt="" />
-        </span>
         <div className="toolbelt-items">
           {tools.map((tool, index) => (
             <div className="tool-chip" style={{ "--tool-index": index } as React.CSSProperties} key={tool.name} title={tool.name}>
@@ -679,21 +676,13 @@ export default function Portfolio() {
 
         <div className="project-secondary-grid reveal">
           {[
+            { name: "Rykozio", type: c.work.rykozio, avatar: "/media/rykozio-avatar.png", clip: "/media/rykozio-build-rota.mp4", vertical: true },
             { name: "Maog", type: c.work.maog, avatar: "/media/maog-avatar.jpg", clip: "/media/maog-terraria.mp4", url: "https://youtu.be/aZ5Z5jDBg2U" },
             { name: "Megazote", type: c.work.megazote, avatar: "/media/megazote-avatar.jpg", clip: "/media/megazote-roblox.mp4", url: "https://www.youtube.com/shorts/ZF2gdtDNE4w" },
-            { name: "Rykozio", type: c.work.rykozio, avatar: "/media/rykozio-avatar.png", clip: "/media/rykozio-build-rota.mp4", vertical: true },
-            { name: "Nini", type: c.work.nini, avatar: "/media/nini-avatar.png", clip: "/media/nini-poppy-playtime.mp4" },
-          ].map(({ name, type, avatar, clip, url, vertical }, index) => (
-            <article className={`project-secondary ${vertical ? "vertical-clip" : ""}`} key={name}>
+            { name: "Nini", type: c.work.nini, avatar: "/media/nini-avatar.png", clip: "/media/nini-poppy-playtime.mp4", wide: true },
+          ].map(({ name, type, avatar, clip, url, vertical, wide }, index) => (
+            <article className={`project-secondary ${vertical ? "vertical-clip" : ""} ${wide ? "wide-clip" : ""}`} key={name}>
               <video src={media(clip)} autoPlay muted loop playsInline preload="metadata" />
-              {vertical && (
-                <div className="vertical-clip-ui" aria-hidden="true">
-                  <span>SHORT / 9:16</span>
-                  <strong>FORMATO<br />VERTICAL</strong>
-                  <div>{Array.from({ length: 9 }, (_, bar) => <i key={bar} style={{ "--bar": bar } as React.CSSProperties} />)}</div>
-                  <small>RITMO / RETENCIÓN</small>
-                </div>
-              )}
               <div className="project-secondary-shade" />
               <span className="project-secondary-index">0{index + 4}</span>
               <div className="project-info">
@@ -715,10 +704,6 @@ export default function Portfolio() {
         <div className="process-console reveal">
           <div className="process-console-bar">
             <span><i /><i /><i /> STRIKE_EDIT / TIMELINE_01</span>
-            <div className="process-character">
-              <img src={media("/media/strike-explicando.webp")} alt="" />
-              <small>{language === "es" ? "Planifico primero. Después hacemos magia." : "Plan first. Then we make magic."}</small>
-            </div>
             <b>00:00:24:12</b>
           </div>
           <div className="process-ribbon" aria-hidden="true">
