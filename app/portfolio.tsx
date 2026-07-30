@@ -129,6 +129,8 @@ const pageCopy = {
       poke: "Vertical · motion · energía visual",
       maog: "Gaming / Narrativa",
       megazote: "Formato corto / YouTube",
+      rykozio: "League of Legends · ritmo vertical",
+      nini: "Gaming · teoría y narrativa",
       view: "Ver trabajo de",
     },
     process: {
@@ -229,6 +231,8 @@ const pageCopy = {
       poke: "Vertical · motion · visual energy",
       maog: "Gaming / Storytelling",
       megazote: "Short-form / YouTube",
+      rykozio: "League of Legends · vertical pacing",
+      nini: "Gaming · theory and storytelling",
       view: "View work for",
     },
     process: {
@@ -567,7 +571,7 @@ export default function Portfolio() {
       <div className="client-strip" aria-label={c.clients}>
         <div className="client-track">
           {[...Array(2)].flatMap((_, group) =>
-            ["Rabanito", "Sara Guzo", "Maog", "Megazote", "Poke Elle", "Xomacito"].map((name) => (
+            ["Rabanito", "Sara Guzo", "Maog", "Megazote", "Poke Elle", "Rykozio", "Nini", "Xomacito"].map((name) => (
               <span key={`${group}-${name}`}>{name}</span>
             )),
           )}
@@ -623,16 +627,20 @@ export default function Portfolio() {
 
         <div className="project-secondary-grid reveal">
           {[
-            ["Maog", c.work.maog, "/media/maog-avatar.jpg", "/media/maog-terraria.mp4", "https://youtu.be/aZ5Z5jDBg2U"],
-            ["Megazote", c.work.megazote, "/media/megazote-avatar.jpg", "/media/megazote-roblox.mp4", "https://www.youtube.com/shorts/ZF2gdtDNE4w"],
-          ].map(([name, type, avatar, clip, url], index) => (
-            <article className="project-secondary" key={name}>
+            { name: "Maog", type: c.work.maog, avatar: "/media/maog-avatar.jpg", clip: "/media/maog-terraria.mp4", url: "https://youtu.be/aZ5Z5jDBg2U" },
+            { name: "Megazote", type: c.work.megazote, avatar: "/media/megazote-avatar.jpg", clip: "/media/megazote-roblox.mp4", url: "https://www.youtube.com/shorts/ZF2gdtDNE4w" },
+            { name: "Rykozio", type: c.work.rykozio, avatar: "/media/rykozio-avatar.png", clip: "/media/rykozio-build-rota.mp4", vertical: true },
+            { name: "Nini", type: c.work.nini, avatar: "/media/nini-avatar.png", clip: "/media/nini-poppy-playtime.mp4" },
+          ].map(({ name, type, avatar, clip, url, vertical }, index) => (
+            <article className={`project-secondary ${vertical ? "vertical-clip" : ""}`} key={name}>
               <video src={media(clip)} autoPlay muted loop playsInline preload="metadata" />
               <div className="project-secondary-shade" />
               <span className="project-secondary-index">0{index + 4}</span>
               <div className="project-info">
                 <div className="project-person"><img src={media(avatar)} alt="" /><div><h3>{name}</h3><p>{type}</p></div></div>
-                <a className="arrow-link" href={url} target="_blank" rel="noreferrer" aria-label={`${c.work.view} ${name}`}><ArrowUpRight /></a>
+                {url
+                  ? <a className="arrow-link" href={url} target="_blank" rel="noreferrer" aria-label={`${c.work.view} ${name}`}><ArrowUpRight /></a>
+                  : <span className="clip-badge" aria-hidden="true"><Play size={17} fill="currentColor" /></span>}
               </div>
             </article>
           ))}
@@ -726,7 +734,12 @@ export default function Portfolio() {
         <p className="source-note reveal">{c.pricing.source}</p>
         <div className="cat-card cat-price reveal">
           <img src={media("/media/cat-typing.gif")} alt="" />
-          <span><b>{c.pricing.assistant}</b><small>{c.pricing.assistantNote}</small></span>
+          <span className="cat-card-copy"><b>{c.pricing.assistant}</b><small>{c.pricing.assistantNote}</small></span>
+          <div className="cat-card-metrics" aria-hidden="true">
+            <span><b>{language === "es" ? "RITMO" : "PACING"}</b><i><em style={{ width: "92%" }} /></i><small>92</small></span>
+            <span><b>MOTION</b><i><em style={{ width: "84%" }} /></i><small>84</small></span>
+            <span><b>{language === "es" ? "GATITOS" : "CATS"}</b><i><em style={{ width: "100%" }} /></i><small>144</small></span>
+          </div>
         </div>
       </section>
 
