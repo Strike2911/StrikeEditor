@@ -5,7 +5,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
   "https://strike-editor-portfolio.strike2911.chatgpt.site";
-const socialImage = `${siteUrl.replace(/\/$/, "")}/og.png?v=20260803-deepglow`;
+const socialImage = `${siteUrl.replace(/\/$/, "")}/og.png?v=20260803-trust`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
