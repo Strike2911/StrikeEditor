@@ -5,7 +5,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
   "https://strike-editor-portfolio.strike2911.chatgpt.site";
-const socialImage = `${siteUrl.replace(/\/$/, "")}/og.png?v=20260803-retention`;
+const socialImage = `${siteUrl.replace(/\/$/, "")}/og.png?v=20260803-deepglow`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -19,13 +19,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Strike — Video editor",
     description:
-      "Ritmo que retiene: shorts, videos largos y motion para creadores.",
+      "Shorts, videos largos y motion para creadores de contenido.",
     images: [
       {
         url: socialImage,
         width: 1200,
         height: 630,
-        alt: "Strike — video editor, ritmo que retiene",
+        alt: "Strike — video editor de shorts, videos largos y motion",
       },
     ],
   },
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Strike — Video editor",
     description:
-      "Ritmo que retiene: shorts, videos largos y motion para creadores.",
+      "Shorts, videos largos y motion para creadores de contenido.",
     images: [socialImage],
   },
 };
