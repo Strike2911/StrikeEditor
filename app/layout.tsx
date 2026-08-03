@@ -5,7 +5,7 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
   "https://strike-editor-portfolio.strike2911.chatgpt.site";
-const socialImage = `${siteUrl.replace(/\/$/, "")}/og.png?v=20260803-busco-editor`;
+const socialImage = `${siteUrl.replace(/\/$/, "")}/og.png?v=20260803-retention`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -17,23 +17,23 @@ export const metadata: Metadata = {
     shortcut: `${basePath}/favicon.png`,
   },
   openGraph: {
-    title: "Strike — Cada segundo cuenta",
+    title: "Strike — Video editor",
     description:
-      "Edición de video, motion y storytelling. Miembro de la comunidad Busco Editor.",
+      "Ritmo que retiene: shorts, videos largos y motion para creadores.",
     images: [
       {
         url: socialImage,
         width: 1200,
         height: 630,
-        alt: "Strike, editor de video y motion — miembro de la comunidad Busco Editor",
+        alt: "Strike — video editor, ritmo que retiene",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Strike — Cada segundo cuenta",
+    title: "Strike — Video editor",
     description:
-      "Edición de video, motion y storytelling. Miembro de la comunidad Busco Editor.",
+      "Ritmo que retiene: shorts, videos largos y motion para creadores.",
     images: [socialImage],
   },
 };
