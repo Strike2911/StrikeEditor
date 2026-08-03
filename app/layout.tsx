@@ -5,8 +5,8 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
   "https://strike-editor-portfolio.strike2911.chatgpt.site";
-const socialGif = `${siteUrl.replace(/\/$/, "")}/og.gif?v=20260803-motion`;
-const socialImage = `${siteUrl.replace(/\/$/, "")}/og.png?v=20260803-motion`;
+const socialGif = `${siteUrl.replace(/\/$/, "")}/og.gif?v=20260803-motion2`;
+const socialImage = `${siteUrl.replace(/\/$/, "")}/og.png?v=20260803-motion2`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -28,13 +28,6 @@ export const metadata: Metadata = {
         height: 504,
         type: "image/gif",
         alt: "Strike — reel animado de video editor",
-      },
-      {
-        url: socialImage,
-        width: 1200,
-        height: 630,
-        type: "image/png",
-        alt: "Strike — video editor de shorts, videos largos y motion",
       },
     ],
   },
