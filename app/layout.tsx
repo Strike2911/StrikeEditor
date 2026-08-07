@@ -5,7 +5,9 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
   "https://strike-editor-portfolio.strike2911.chatgpt.site";
-const socialGif = `${siteUrl.replace(/\/$/, "")}/og.gif?v=20260803-motion2`;
+// A distinct, immutable filename keeps Discord's embed proxy from reusing an
+// older static snapshot of the social card.
+const socialGif = `${siteUrl.replace(/\/$/, "")}/strike-motion-reel.gif?v=20260806`;
 const socialImage = `${siteUrl.replace(/\/$/, "")}/og.png?v=20260803-motion2`;
 
 export const metadata: Metadata = {
