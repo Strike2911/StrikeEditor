@@ -919,7 +919,6 @@ export default function Portfolio() {
           <div className="cat-card-metrics" aria-hidden="true">
             <AnimatedMetric label={language === "es" ? "RITMO" : "PACING"} target={92} />
             <AnimatedMetric label="MOTION" target={84} />
-            <AnimatedMetric label={language === "es" ? "GATITOS" : "CATS"} target={100} />
           </div>
         </div>
       </section>
