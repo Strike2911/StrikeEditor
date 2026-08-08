@@ -8,12 +8,13 @@ import {
   Check,
   Clapperboard,
   Clock3,
-  Code2,
   Gauge,
   Layers3,
   MessageCircle,
+  Moon,
   Play,
   Sparkles,
+  Sun,
   WandSparkles,
   Zap,
 } from "lucide-react";
@@ -22,6 +23,7 @@ import { FaDiscord, FaYoutube } from "react-icons/fa6";
 type Format = "vertical" | "horizontal";
 type Tier = "basic" | "intermediate" | "complex";
 type Language = "es" | "en";
+type Theme = "light" | "dark";
 
 const media = (path: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${path}`;
 
@@ -446,15 +448,16 @@ function ParticleField({ pointer }: { pointer: React.MutableRefObject<{ x: numbe
   return <canvas ref={canvasRef} className="particle-canvas" aria-hidden="true" />;
 }
 
-function PortfolioVideo({ src, className }: { src: string; className?: string }) {
+function PortfolioVideo({ src, className, toggleLabel }: { src: string; className?: string; toggleLabel?: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
     let inView = false;
     const syncPlayback = () => {
-      if (inView && document.visibilityState === "visible") {
+      if (inView && document.visibilityState === "visible" && !paused) {
         void video.play().catch(() => undefined);
       } else {
         video.pause();
@@ -474,9 +477,30 @@ function PortfolioVideo({ src, className }: { src: string; className?: string })
       document.removeEventListener("visibilitychange", syncPlayback);
       video.pause();
     };
-  }, []);
+  }, [paused]);
 
-  return <video ref={videoRef} className={className} src={src} muted loop playsInline preload="metadata" />;
+  const togglePlayback = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      setPaused(false);
+      void video.play().catch(() => undefined);
+    } else {
+      setPaused(true);
+      video.pause();
+    }
+  };
+
+  return (
+    <>
+      <video ref={videoRef} className={className} src={src} muted loop playsInline preload="metadata" />
+      {toggleLabel && (
+        <button className="video-toggle" type="button" onClick={togglePlayback} aria-label={toggleLabel} aria-pressed={paused}>
+          <Play size={17} fill="currentColor" />
+        </button>
+      )}
+    </>
+  );
 }
 
 function ContextLedger({ items }: { items: readonly (readonly [string, string])[] }) {
@@ -543,6 +567,7 @@ export default function Portfolio() {
   const pointer = useRef({ x: -500, y: -500 });
   const pointerFrame = useRef(0);
   const [language, setLanguage] = useState<Language>("es");
+  const [theme, setTheme] = useState<Theme>("light");
   const [format, setFormat] = useState<Format>("vertical");
   const [tier, setTier] = useState<Tier>("intermediate");
   const [amount, setAmount] = useState(1);
@@ -561,6 +586,18 @@ export default function Portfolio() {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("strike-theme");
+    const preferred = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    setTheme(saved === "dark" || saved === "light" ? saved : preferred);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    window.localStorage.setItem("strike-theme", theme);
+  }, [theme]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -635,6 +672,16 @@ export default function Portfolio() {
             <button className={language === "es" ? "active" : ""} onClick={() => setLanguage("es")} aria-pressed={language === "es"}><span aria-hidden="true">🇪🇸</span><b>ES</b></button>
             <button className={language === "en" ? "active" : ""} onClick={() => setLanguage("en")} aria-pressed={language === "en"}><span aria-hidden="true">🇺🇸</span><b>EN</b></button>
           </div>
+          <button
+            className="theme-toggle"
+            type="button"
+            onClick={() => setTheme((current) => current === "light" ? "dark" : "light")}
+            aria-label={language === "es" ? "Cambiar modo claro u oscuro" : "Toggle light or dark mode"}
+            aria-pressed={theme === "dark"}
+          >
+            <Sun className="theme-sun" aria-hidden="true" />
+            <Moon className="theme-moon" aria-hidden="true" />
+          </button>
           <a href="https://www.youtube.com/@ElStrikew" target="_blank" rel="noreferrer" aria-label="YouTube de Strike"><FaYoutube /></a>
           <a href="https://discord.gg/KNh3ZtNkUu" target="_blank" rel="noreferrer" aria-label="Discord para clientes"><FaDiscord /></a>
           <div className="nav-status"><span>{c.nav.available}</span></div>
@@ -679,7 +726,7 @@ export default function Portfolio() {
       <div className="client-strip" aria-label={c.clients}>
         <div className="client-track">
           {[...Array(2)].flatMap((_, group) =>
-            ["Rabanito", "Sara Guzo", "Maog", "Megazote", "Poke Elle", "Rykozio", "Nini", "Xomacito"].map((name) => (
+            ["Rabanito", "Sara Guzo", "Maog", "Megazote", "Poke Elle", "Rykozio", "Nini"].map((name) => (
               <span key={`${group}-${name}`}>{name}</span>
             )),
           )}
@@ -746,14 +793,15 @@ export default function Portfolio() {
             { name: "Nini", type: c.work.nini, avatar: "/media/nini-avatar.png", clip: "/media/nini-poppy-playtime.mp4", wide: true },
           ].map(({ name, type, avatar, clip, url, vertical, wide }, index) => (
             <article className={`project-secondary ${vertical ? "vertical-clip" : ""} ${wide ? "wide-clip" : ""}`} key={name}>
-              <PortfolioVideo src={media(clip)} />
+              <PortfolioVideo
+                src={media(clip)}
+                toggleLabel={!url ? `${language === "es" ? "Reproducir o pausar" : "Play or pause"} ${name}` : undefined}
+              />
               <div className="project-secondary-shade" />
               <span className="project-secondary-index">0{index + 4}</span>
               <div className="project-info">
                 <div className="project-person"><img src={media(avatar)} alt="" /><div><h3>{name}</h3><p>{type}</p></div></div>
-                {url
-                  ? <a className="arrow-link" href={url} target="_blank" rel="noreferrer" aria-label={`${c.work.view} ${name}`}><ArrowUpRight /></a>
-                  : <span className="clip-badge" aria-hidden="true"><Play size={17} fill="currentColor" /></span>}
+                {url && <a className="arrow-link" href={url} target="_blank" rel="noreferrer" aria-label={`${c.work.view} ${name}`}><ArrowUpRight /></a>}
               </div>
             </article>
           ))}
@@ -876,27 +924,7 @@ export default function Portfolio() {
         </div>
       </section>
 
-      <section className="section reveal" data-index="04" data-label="XOMACITO">
-        <div className="split-feature">
-          <div>
-            <p className="kicker light">{c.xoma.kicker}</p>
-            <h2>Xomacito 3.0</h2>
-            <p>{c.xoma.description}</p>
-            <div className="xoma-tags">{c.xoma.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
-            <a className="button light-button" href="https://github.com/Strike2911/Xomacito" target="_blank" rel="noreferrer"><Code2 size={17} /> {c.xoma.button} <ArrowUpRight size={15} /></a>
-          </div>
-          <div className="xoma-window">
-            <div className="xoma-titlebar"><span><i /> XOMACITO / MOTOR 3.0</span><b>— □ ×</b></div>
-            <div className="xoma-screen">
-              <img src={media("/media/xomacito-interface.png")} alt="Xomacito 3.0" />
-              <i className="xoma-scan" aria-hidden="true" />
-            </div>
-            <div className="xoma-status"><span>{c.xoma.status}</span><b>YT · TT · IG · VIMEO</b></div>
-          </div>
-        </div>
-      </section>
-
-      <section className="section" aria-labelledby="collab-title" data-index="05" data-label={language === "es" ? "REFERENCIAS" : "REFERENCES"}>
+      <section className="section" aria-labelledby="collab-title" data-index="04" data-label={language === "es" ? "REFERENCIAS" : "REFERENCES"}>
         <div className="section-head reveal">
           <div><p className="kicker">{c.collab.kicker}</p><h2 id="collab-title">{c.collab.title[0]}<br /><em>{c.collab.title[1]}</em></h2></div>
           <div className="section-context">
