@@ -5,9 +5,9 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ??
   "https://strike-editor-portfolio.strike2911.chatgpt.site";
-// A distinct, immutable filename keeps Discord's embed proxy from reusing an
-// older static snapshot of the social card.
-const socialGif = `${siteUrl.replace(/\/$/, "")}/strike-motion-reel.gif?v=20260806`;
+// Discord's current media pipeline preserves animation more reliably in WebP
+// embeds than it does for Open Graph GIF thumbnails.
+const socialAnimation = `${siteUrl.replace(/\/$/, "")}/strike-motion-reel.webp?v=20260808`;
 const socialImage = `${siteUrl.replace(/\/$/, "")}/og.png?v=20260803-motion2`;
 
 export const metadata: Metadata = {
@@ -25,10 +25,10 @@ export const metadata: Metadata = {
       "Shorts, videos largos y motion para creadores de contenido.",
     images: [
       {
-        url: socialGif,
+        url: socialAnimation,
         width: 960,
         height: 504,
-        type: "image/gif",
+        type: "image/webp",
         alt: "Strike — reel animado de video editor",
       },
     ],
