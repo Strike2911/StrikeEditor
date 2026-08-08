@@ -790,7 +790,7 @@ export default function Portfolio() {
             { name: "Rykozio", type: c.work.rykozio, avatar: "/media/rykozio-avatar.png", clip: "/media/rykozio-build-rota.mp4", vertical: true },
             { name: "Maog", type: c.work.maog, avatar: "/media/maog-avatar.jpg", clip: "/media/maog-terraria.mp4", url: "https://youtu.be/aZ5Z5jDBg2U" },
             { name: "Megazote", type: c.work.megazote, avatar: "/media/megazote-avatar.jpg", clip: "/media/megazote-roblox.mp4", url: "https://www.youtube.com/shorts/ZF2gdtDNE4w" },
-            { name: "Nini", type: c.work.nini, avatar: "/media/nini-avatar.png", clip: "/media/nini-poppy-playtime.mp4", wide: true },
+            { name: "Nini", type: c.work.nini, avatar: "/media/nini-avatar.png", clip: "/media/nini-poppy-playtime.mp4", url: "https://youtu.be/Hxlt1oTFUg4?si=yoIts-Qci4j6uaQT", wide: true },
           ].map(({ name, type, avatar, clip, url, vertical, wide }, index) => (
             <article className={`project-secondary ${vertical ? "vertical-clip" : ""} ${wide ? "wide-clip" : ""}`} key={name}>
               <PortfolioVideo
