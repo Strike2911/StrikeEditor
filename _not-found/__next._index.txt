@@ -2,4 +2,4 @@
 2:I[7121,[],""]
 3:I[4581,[],""]
 :HL["/StrikeEditor/_next/static/css/e0a99c64bb3c07fc.css","style"]
-0:{"rsc":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/StrikeEditor/_next/static/css/e0a99c64bb3c07fc.css","precedence":"next"}]],["$","html",null,{"lang":"es","children":["$","body",null,{"children":["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"0eD4UfHb6QKJqC8K6-ApV"}
+0:{"rsc":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/StrikeEditor/_next/static/css/e0a99c64bb3c07fc.css","precedence":"next"}]],["$","html",null,{"lang":"es","children":["$","body",null,{"children":["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"WViLkvMo4kpgrYkF3tULW"}
